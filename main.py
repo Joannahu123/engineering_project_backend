@@ -26,6 +26,9 @@ from api.nestPost import nestPost_api # Justin added this, custom format for his
 from api.messages_api import messages_api # Adi added this, messages for his website
 from api.carphoto import car_api
 from api.carChat import car_chat_api
+from api.posting import posting_api
+
+
 
 from api.vote import vote_api
 # database Initialization functions
@@ -37,6 +40,9 @@ from model.channel import Channel, initChannels
 from model.post import Post, initPosts
 from model.nestPost import NestPost, initNestPosts # Justin added this, custom format for his website
 from model.vote import Vote, initVotes
+from model.posting import Posting, initPosting
+
+
 # server only Views
 
 # register URIs for api endpoints
@@ -53,6 +59,8 @@ app.register_blueprint(nestPost_api)
 app.register_blueprint(nestImg_api)
 app.register_blueprint(vote_api)
 app.register_blueprint(car_api)
+app.register_blueprint(posting_api)
+
 
 # Tell Flask-Login the view function name of your login route
 login_manager.login_view = "login"
@@ -160,6 +168,8 @@ def generate_data():
     initPosts()
     initNestPosts()
     initVotes()
+    initPosting()
+
     
 # Backup the old database
 def backup_database(db_uri, backup_uri):
@@ -181,6 +191,7 @@ def extract_data():
         data['groups'] = [group.read() for group in Group.query.all()]
         data['channels'] = [channel.read() for channel in Channel.query.all()]
         data['posts'] = [post.read() for post in Post.query.all()]
+        data['posting'] = [posting.read() for posting in Posting.query.all()]
     return data
 
 # Save extracted data to JSON files
@@ -195,7 +206,7 @@ def save_data_to_json(data, directory='backup'):
 # Load data from JSON files
 def load_data_from_json(directory='backup'):
     data = {}
-    for table in ['users', 'sections', 'groups', 'channels', 'posts']:
+    for table in ['users', 'sections', 'groups', 'channels', 'posts', 'posting']:
         with open(os.path.join(directory, f'{table}.json'), 'r') as f:
             data[table] = json.load(f)
     return data
@@ -208,6 +219,7 @@ def restore_data(data):
         _ = Group.restore(data['groups'], users)
         _ = Channel.restore(data['channels'])
         _ = Post.restore(data['posts'])
+        _ = Posting.restore(data['posting'])
     print("Data restored to the new database.")
 
 # Define a command to backup data
@@ -229,4 +241,4 @@ app.cli.add_command(custom_cli)
 # this runs the flask application on the development server
 if __name__ == "__main__":
     # change name for testing
-    app.run(debug=True, host="0.0.0.0", port="8887")
+    app.run(debug=True, host="0.0.0.0", port="8587")
